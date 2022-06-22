@@ -3,7 +3,7 @@ const { schemaCreate, schemaPatch } = require('../models/contacts');
 
 const listContacts = async (req, res, next) => {
   try {
-    const all = await contacts.listContacts();
+    const all = await contacts.listContacts(req.query);
     res.json(all);
   } catch (error) {
     next(error);
@@ -24,12 +24,15 @@ const getContactById = async (req, res, next) => {
 
 const addContact = async (req, res, next) => {
   try {
+    const { _id } = req.user;
+
     const { error } = schemaCreate.validate(req.body);
     if (error) {
       res.status(400).json({ message: error });
     }
 
-    const contact = await contacts.addContact(req.body);
+    const contact = await contacts.addContact(req.body, _id);
+
     res.status(201).json(contact);
   } catch (error) {
     next(error);
@@ -40,7 +43,7 @@ const removeContact = async (req, res, next) => {
     const id = req.params.contactId;
     const deletedContact = await contacts.removeContact(id);
     if (!deletedContact) {
-      throw createError(404, 'Not found');
+      res.status(404).json('not found');
     }
     // res.status(204).json({ message: 'contact deleted' });
     res.json({ message: 'contact deleted' });
@@ -67,12 +70,12 @@ const updateStatusContact = async (req, res, next) => {
     const id = req.params.contactId;
     const { error } = schemaPatch.validate(req.body);
     if (error) {
-      res.status(400).json({ message: error });
+      res.status(400).json('missing field favorite');
     }
 
     const favoriteContact = await contacts.updateContact(id, req.body);
     if (!favoriteContact) {
-      res.status(400).json('missing field favorite');
+      res.status(404).json('Not found');
     }
     res.json(favoriteContact);
   } catch (error) {

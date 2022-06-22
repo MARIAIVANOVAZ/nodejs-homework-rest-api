@@ -16,6 +16,10 @@ const schema = new Schema({
     type: Boolean,
     default: false,
   },
+  owner: {
+    ref: 'user',
+    type: Schema.Types.ObjectId,
+  },
 });
 
 const schemaCreate = Joi.object({
@@ -24,7 +28,7 @@ const schemaCreate = Joi.object({
     minDomainSegments: 2,
     tlds: { allow: ['com', 'net'] },
   }),
-  phone: Joi.number().min(3).max(16).required(),
+  phone: Joi.number().required(),
   favorite: Joi.bool(),
 });
 const schemaPatch = Joi.object({
